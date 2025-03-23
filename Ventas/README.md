@@ -24,6 +24,6 @@ Importante: los importes de venta están calculados sin tener en cuenta los gast
 
 ![alt text](<Detalle Comerciales.PNG>)
 
-6. Proyección de ventas de las próximas 4 semanas. Se basa en el histórico de ventas de las próximas 4 semanas del año anterior. Nos da visibilidad sobre qué productos erán los que vamos a vender y sobre los que tenemos que estar atentos las próximas semanas.
+6. Proyección de ventas de las próximas 4 semanas. Se basa en el histórico de ventas de las próximas 4 semanas del año anterior. Nos da visibilidad sobre qué productos eran los que vamos a vender y sobre los que tenemos que estar atentos las próximas semanas.
 
 ![alt text](<Proyección Ventas.PNG>)
