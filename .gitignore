@@ -1,0 +1,15 @@
+# Entornos virtuales
+venv/
+venv_telco/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+.Rproj.user
+.RDataTmp
+.RDataTmp1
+.Rhistory
+Proyecto.Rproj
