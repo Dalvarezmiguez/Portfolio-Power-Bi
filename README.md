@@ -62,7 +62,6 @@ Aquí transformo datos en **insights accionables** usando **Power BI, SQL, Pytho
 - Tendencia mensual de vuelos: gráfico de líneas.
 
 [Ver detalle del proyecto →](./Proyecto_Vuelos/README.md)  
-[Ir al dashboard →](https://public.tableau.com/views/Proyecto_Vuelos_17594980949080/Informe?:language=es-ES)
 
 ---
 
@@ -74,7 +73,7 @@ Aquí transformo datos en **insights accionables** usando **Power BI, SQL, Pytho
 - **10 proveedores concentran más del 64 %** de las cantidades totales compradas.  
 - Optimización propuesta: renegociar contratos de alto volumen.
 
-[Más info →](Proyecto_Compras_ADW2022/README.md)
+[Ver detalle del proyecto →](Proyecto_Compras_ADW2022/README.md)
 
 ---
 
@@ -85,7 +84,7 @@ Aquí transformo datos en **insights accionables** usando **Power BI, SQL, Pytho
 - Los **gastos de personal subieron un 11,8 %**, mayor peso relativo en el presupuesto.  
 - Dataset público analizado con visualizaciones avanzadas (treemap, cintas, matrices).
 
-[Más info →](./Proyecto_Cataluña/README.md)
+[Ver detalle del proyecto →](./Proyecto_Cataluña/README.md)
 
 ---
 
@@ -96,7 +95,7 @@ Aquí transformo datos en **insights accionables** usando **Power BI, SQL, Pytho
 - Dashboard incluye **cuenta de resultados** y visualización geográfica de tiendas.  
 - Aperturas y cierres estratégicos durante el periodo.
 
-[Más info →](./Proyecto_Inditex/README.md)
+[Ver detalle del proyecto →](./Proyecto_Inditex/README.md)
 
 ---
 
@@ -107,14 +106,16 @@ Aquí transformo datos en **insights accionables** usando **Power BI, SQL, Pytho
 - Diferencias claras entre ranking por puntos y por posición media.  
 - Villarreal: equipo menos goleado en la última década.
 
-[Más info →](./Proyecto_LaLiga/README.md)
+[Ver detalle del proyecto →](./Proyecto_LaLiga/README.md)
 
 ---
 
 ## Tecnologías utilizadas
-- **Power BI** (visualizaciones, DAX, modelado)  
+- **Power BI** (visualizaciones, DAX, modelado)
+- **Tableau** (dashboards interactivos y storytelling de datos)  
 - **SQL** (consultas y preparación de datos)  
-- **Python** (análisis exploratorio, Machine Learning, visualización)  
+- **Python** (análisis exploratorio, Machine Learning, visualización) 
+- **R** (análisis estadístico y visualización avanzada) 
 - **Power Query** (transformación de datos)  
 - **GitHub** (documentación y versionado)
 
