@@ -1,5 +1,4 @@
-import requests, json, os, base64
-from io import BytesIO
+import requests, json, os
 import matplotlib.pyplot as plt
 
 # --- Configuración ---
@@ -27,7 +26,22 @@ def compare(current, previous):
     elif current < previous: return f"{current} ⬇️"
     else: return f"{current} ➡️"
 
-# --- Tablas HTML ---
+# --- Guardar gráficos diarios ---
+def save_daily_bar_chart(data_list, filename, color="#4CAF50", title=""):
+    dates = [v['timestamp'][:10] for v in data_list]
+    counts = [v['count'] for v in data_list]
+    plt.figure(figsize=(8,3))
+    plt.bar(dates, counts, color=color)
+    plt.xticks(rotation=45, ha='right')
+    plt.title(title)
+    plt.tight_layout()
+    plt.savefig(filename)
+    plt.close()
+
+save_daily_bar_chart(views.get('views', []), "visitas.png", color="#4CAF50", title="Visitas diarias")
+save_daily_bar_chart(clones.get('clones', []), "clones.png", color="#2196F3", title="Clones diarios")
+
+# --- Crear HTML resumido ---
 def make_table(data, headers):
     html = '<table style="border-collapse: collapse; width: 100%;">'
     html += '<tr style="background-color: #4CAF50; color: white;">'
@@ -43,56 +57,26 @@ def make_table(data, headers):
     html += '</table>'
     return html
 
-# --- Generar gráfico diario como imagen base64 ---
-def make_daily_bars_plot(daily_data, title, color="#4CAF50"):
-    dates = [v['timestamp'][:10] for v in daily_data]
-    counts = [v['count'] for v in daily_data]
-    if not dates:
-        dates = ["—"]
-        counts = [0]
-
-    fig, ax = plt.subplots(figsize=(8,2))
-    ax.bar(dates, counts, color=color)
-    ax.set_title(title, fontsize=10)
-    ax.set_ylabel("Cantidad", fontsize=8)
-    ax.set_xticks(range(len(dates)))
-    ax.set_xticklabels(dates, rotation=45, fontsize=8)
-    plt.tight_layout()
-
-    buf = BytesIO()
-    plt.savefig(buf, format="png")
-    plt.close(fig)
-    buf.seek(0)
-    img_base64 = base64.b64encode(buf.read()).decode("utf-8")
-    return f'<img src="data:image/png;base64,{img_base64}"/>'
-
-# --- Crear HTML completo ---
 html_body = f"""
-<h1>📊 Informe semanal de tráfico: {repo}</h1>
+<h1>Informe semanal de tráfico: {repo}</h1>
 
 <h2>Visitas</h2>
-{make_table(
-    [[compare(views.get('count',0), history.get('views',0)),
-      compare(views.get('uniques',0), history.get('uniques_views',0))]],
-    ['Total visitas','Visitantes únicos']
-)}
-{make_daily_bars_plot(views.get('views',[]), "Gráfico diario de visitas", "#4CAF50")}
+{make_table([[compare(views.get('count',0), history.get('views',0)),
+              compare(views.get('uniques',0), history.get('uniques_views',0))]],
+           ['Total visitas','Visitantes únicos'])}
 
 <h2>Clones</h2>
-{make_table(
-    [[compare(clones.get('count',0), history.get('clones',0)),
-      compare(clones.get('uniques',0), history.get('uniques_clones',0))]],
-    ['Total clones','Clonadores únicos']
-)}
-{make_daily_bars_plot(clones.get('clones',[]), "Gráfico diario de clones", "#2196F3")}
+{make_table([[compare(clones.get('count',0), history.get('clones',0)),
+              compare(clones.get('uniques',0), history.get('uniques_clones',0))]],
+           ['Total clones','Clonadores únicos'])}
 
-<h2>🌍 Referrers principales</h2>
+<h2>Referrers principales</h2>
 {make_table([[r['referrer'], r['count']] for r in referrers], ['Referrer','Visitas'])}
 
-<h2>📁 Archivos más visitados</h2>
+<h2>Archivos más visitados</h2>
 {make_table([[c['path'], c['count']] for c in content], ['Archivo','Visitas'])}
 
-<p style="font-size:10px;color:gray;">Informe generado automáticamente por GitHub Actions</p>
+<p>Informe generado automáticamente por GitHub Actions</p>
 """
 
 # --- Guardar HTML ---
@@ -104,7 +88,7 @@ history = {
     "views": views.get("count",0),
     "uniques_views": views.get("uniques",0),
     "clones": clones.get("count",0),
-    "uniques_clones": clones.get("uniques",0)
+    "uniques_clones": clones.get("uniques_clones",0)
 }
 with open(history_file,"w") as f:
     json.dump(history,f)
