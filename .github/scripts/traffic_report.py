@@ -1,6 +1,6 @@
-import requests, json, os, matplotlib.pyplot as plt
+import requests, json, os, base64
 from io import BytesIO
-import base64
+import matplotlib.pyplot as plt
 
 # --- Configuración ---
 token = os.environ["GITHUB_TOKEN"]
@@ -27,7 +27,7 @@ def compare(current, previous):
     elif current < previous: return f"{current} ⬇️"
     else: return f"{current} ➡️"
 
-# --- Crear tablas HTML ---
+# --- Tablas HTML ---
 def make_table(data, headers):
     html = '<table style="border-collapse: collapse; width: 100%;">'
     html += '<tr style="background-color: #4CAF50; color: white;">'
@@ -43,19 +43,20 @@ def make_table(data, headers):
     html += '</table>'
     return html
 
-# --- Generar gráfico y convertir a base64 ---
-def make_plot(daily_data, title, color="#4CAF50"):
+# --- Generar gráfico diario como imagen base64 ---
+def make_daily_bars_plot(daily_data, title, color="#4CAF50"):
     dates = [v['timestamp'][:10] for v in daily_data]
     counts = [v['count'] for v in daily_data]
-    if not dates:  # si no hay datos
+    if not dates:
         dates = ["—"]
         counts = [0]
 
-    fig, ax = plt.subplots(figsize=(8,3))
+    fig, ax = plt.subplots(figsize=(8,2))
     ax.bar(dates, counts, color=color)
-    ax.set_title(title)
-    ax.set_ylabel("Cantidad")
-    plt.xticks(rotation=45)
+    ax.set_title(title, fontsize=10)
+    ax.set_ylabel("Cantidad", fontsize=8)
+    ax.set_xticks(range(len(dates)))
+    ax.set_xticklabels(dates, rotation=45, fontsize=8)
     plt.tight_layout()
 
     buf = BytesIO()
@@ -65,13 +66,9 @@ def make_plot(daily_data, title, color="#4CAF50"):
     img_base64 = base64.b64encode(buf.read()).decode("utf-8")
     return f'<img src="data:image/png;base64,{img_base64}"/>'
 
-# --- Referrers y archivos ---
-referrers_data = [[r['referrer'], r['count']] for r in referrers] if referrers else [["—","—"]]
-content_data = [[c['path'], c['count']] for c in content] if content else [["—","—"]]
-
 # --- Crear HTML completo ---
 html_body = f"""
-<h1>📊 Informe semanal de tráfico — {repo}</h1>
+<h1>📊 Informe semanal de tráfico: {repo}</h1>
 
 <h2>Visitas</h2>
 {make_table(
@@ -79,7 +76,7 @@ html_body = f"""
       compare(views.get('uniques',0), history.get('uniques_views',0))]],
     ['Total visitas','Visitantes únicos']
 )}
-{make_plot(views.get('views',[]), "Gráfico de visitas", "#4CAF50")}
+{make_daily_bars_plot(views.get('views',[]), "Gráfico diario de visitas", "#4CAF50")}
 
 <h2>Clones</h2>
 {make_table(
@@ -87,15 +84,15 @@ html_body = f"""
       compare(clones.get('uniques',0), history.get('uniques_clones',0))]],
     ['Total clones','Clonadores únicos']
 )}
-{make_plot(clones.get('clones',[]), "Gráfico de clones", "#2196F3")}
+{make_daily_bars_plot(clones.get('clones',[]), "Gráfico diario de clones", "#2196F3")}
 
 <h2>🌍 Referrers principales</h2>
-{make_table(referrers_data, ['Referrer','Visitas'])}
+{make_table([[r['referrer'], r['count']] for r in referrers], ['Referrer','Visitas'])}
 
 <h2>📁 Archivos más visitados</h2>
-{make_table(content_data, ['Archivo','Visitas'])}
+{make_table([[c['path'], c['count']] for c in content], ['Archivo','Visitas'])}
 
-<p>Informe generado automáticamente por GitHub Actions</p>
+<p style="font-size:10px;color:gray;">Informe generado automáticamente por GitHub Actions</p>
 """
 
 # --- Guardar HTML ---
