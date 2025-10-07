@@ -1,5 +1,6 @@
-import requests, json, os
-import matplotlib.pyplot as plt
+import requests, json, os, matplotlib.pyplot as plt
+from io import BytesIO
+import base64
 
 # --- Configuración ---
 token = os.environ["GITHUB_TOKEN"]
@@ -42,25 +43,35 @@ def make_table(data, headers):
     html += '</table>'
     return html
 
-# --- Crear gráficos ---
-def make_daily_plot(data_list, filename, color="#4CAF50", title=""):
-    dates = [v['timestamp'][:10] for v in data_list]
-    counts = [v['count'] for v in data_list]
-    plt.figure(figsize=(10,4))
-    plt.bar(dates, counts, color=color)
-    plt.xticks(rotation=45)
-    plt.title(title)
-    plt.tight_layout()
-    plt.savefig(filename)
-    plt.close()
+# --- Generar gráfico y convertir a base64 ---
+def make_plot(daily_data, title, color="#4CAF50"):
+    dates = [v['timestamp'][:10] for v in daily_data]
+    counts = [v['count'] for v in daily_data]
+    if not dates:  # si no hay datos
+        dates = ["—"]
+        counts = [0]
 
-# Generar gráficos
-make_daily_plot(views.get('views',[]), "visitas.png", color="#4CAF50", title="Visitas diarias")
-make_daily_plot(clones.get('clones',[]), "clones.png", color="#2196F3", title="Clones diarios")
+    fig, ax = plt.subplots(figsize=(8,3))
+    ax.bar(dates, counts, color=color)
+    ax.set_title(title)
+    ax.set_ylabel("Cantidad")
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+
+    buf = BytesIO()
+    plt.savefig(buf, format="png")
+    plt.close(fig)
+    buf.seek(0)
+    img_base64 = base64.b64encode(buf.read()).decode("utf-8")
+    return f'<img src="data:image/png;base64,{img_base64}"/>'
+
+# --- Referrers y archivos ---
+referrers_data = [[r['referrer'], r['count']] for r in referrers] if referrers else [["—","—"]]
+content_data = [[c['path'], c['count']] for c in content] if content else [["—","—"]]
 
 # --- Crear HTML completo ---
 html_body = f"""
-<h1>Informe semanal de tráfico: {repo}</h1>
+<h1>📊 Informe semanal de tráfico — {repo}</h1>
 
 <h2>Visitas</h2>
 {make_table(
@@ -68,7 +79,7 @@ html_body = f"""
       compare(views.get('uniques',0), history.get('uniques_views',0))]],
     ['Total visitas','Visitantes únicos']
 )}
-<p>Gráfico de visitas adjunto: <strong>visitas.png</strong></p>
+{make_plot(views.get('views',[]), "Gráfico de visitas", "#4CAF50")}
 
 <h2>Clones</h2>
 {make_table(
@@ -76,13 +87,15 @@ html_body = f"""
       compare(clones.get('uniques',0), history.get('uniques_clones',0))]],
     ['Total clones','Clonadores únicos']
 )}
-<p>Gráfico de clones adjunto: <strong>clones.png</strong></p>
+{make_plot(clones.get('clones',[]), "Gráfico de clones", "#2196F3")}
 
-<h2>Referrers principales</h2>
-{make_table([[r['referrer'], r['count']] for r in referrers], ['Referrer','Visitas'])}
+<h2>🌍 Referrers principales</h2>
+{make_table(referrers_data, ['Referrer','Visitas'])}
 
-<h2>Archivos más visitados</h2>
-{make_table([[c['path'], c['count']] for c in content], ['Archivo','Visitas'])}
+<h2>📁 Archivos más visitados</h2>
+{make_table(content_data, ['Archivo','Visitas'])}
+
+<p>Informe generado automáticamente por GitHub Actions</p>
 """
 
 # --- Guardar HTML ---
@@ -94,8 +107,7 @@ history = {
     "views": views.get("count",0),
     "uniques_views": views.get("uniques",0),
     "clones": clones.get("count",0),
-    "uniques_clones": clones.get("uniques_clones",0)
+    "uniques_clones": clones.get("uniques",0)
 }
 with open(history_file,"w") as f:
     json.dump(history,f)
-
