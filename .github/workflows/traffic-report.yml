@@ -1,15 +1,47 @@
-name: Enviar informe semanal
+name: Informe semanal de tráfico con comparativa y gráfico diario
 
 on:
+  schedule:
+    - cron: '0 9 * * 1'  # Cada lunes a las 9 AM UTC
   workflow_dispatch:
 
 jobs:
-  send-email:
+  traffic_report:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout del repo
-        uses: actions/checkout@v4
 
+      # 1️⃣ Checkout del repositorio
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      # 2️⃣ Debug: listar archivos (opcional)
+      - name: Listar archivos para debug
+        run: ls -R
+
+      # 3️⃣ Configurar Python
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      # 4️⃣ Instalar requests y ejecutar script
+      - name: Ejecutar script de tráfico
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          REPO: Dalvarezmiguez/Portfolio-Power-Bi
+        run: |
+          pip install requests
+          python .github/scripts/traffic_report.py
+
+      # 5️⃣ Debug de secretos (opcional, confirma que no estén vacíos)
+      - name: Debug secretos
+        run: |
+          echo "EMAIL_ADDRESS=${{ secrets.EMAIL_ADDRESS }}"
+          echo "EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}"
+
+      # 6️⃣ Enviar informe por correo (versión corregida)
       - name: Leer contenido HTML
         id: leer_html
         run: |
@@ -29,3 +61,4 @@ jobs:
           to: ${{ secrets.EMAIL_ADDRESS }}
           from: ${{ secrets.EMAIL_ADDRESS }}
           html_body: ${{ env.html_body }}
+
