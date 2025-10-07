@@ -10,13 +10,6 @@ jobs:
       - name: Checkout del repo
         uses: actions/checkout@v3
 
-      - name: Leer archivo HTML
-        id: read_html
-        run: |
-          echo "HTML_CONTENT<<EOF" >> $GITHUB_ENV
-          cat traffic-report.html >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-
       - name: Enviar informe por correo
         uses: dawidd6/action-send-mail@v3
         with:
@@ -27,4 +20,10 @@ jobs:
           subject: "Informe semanal de tráfico del repo"
           to: ${{ secrets.EMAIL_ADDRESS }}
           from: ${{ secrets.EMAIL_ADDRESS }}
-          html_body: ${{ env.HTML_CONTENT }}
+          html_body: ${{ steps.read_html.outputs.html_content }}
+
+      - name: Leer archivo HTML
+        id: read_html
+        run: |
+          html_content=$(cat traffic-report.html)
+          echo "::set-output name=html_content::$html_content"
