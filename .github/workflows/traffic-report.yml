@@ -15,14 +15,13 @@ jobs:
         with:
           server_address: smtp.gmail.com
           server_port: 587
-          username: ${{ secrets.EMAIL_ADDRESS }}    # Tu correo
-          password: ${{ secrets.EMAIL_PASSWORD }}   # Tu App Password
+          username: ${{ secrets.EMAIL_ADDRESS }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
           subject: "Informe semanal de tráfico del repo"
-          to: ${{ secrets.EMAIL_ADDRESS }}         # Destinatario
-          from: ${{ secrets.EMAIL_ADDRESS }}       # Remitente (debe coincidir con tu correo)
-          body: ${{ steps.read_html.outputs.content }}  # Contenido del HTML
-          body_type: html
-
+          to: ${{ secrets.EMAIL_ADDRESS }}
+          from: ${{ secrets.EMAIL_ADDRESS }}
+          html_body: "<html><body>Contenido del reporte</body></html>"
+      
       - name: Leer archivo HTML
         id: read_html
         run: |
