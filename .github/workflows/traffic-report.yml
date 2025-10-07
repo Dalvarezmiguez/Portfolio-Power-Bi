@@ -9,6 +9,9 @@ jobs:
   traffic_report:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+
       - name: Configurar Python
         uses: actions/setup-python@v4
         with:
