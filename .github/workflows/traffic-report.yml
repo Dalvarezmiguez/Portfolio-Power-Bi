@@ -45,9 +45,8 @@ jobs:
       - name: Leer contenido HTML
         id: leer_html
         run: |
-          contenido=$(cat traffic-report.html)
           echo "html_body<<EOF" >> $GITHUB_ENV
-          echo "$contenido" >> $GITHUB_ENV
+          cat traffic-report.html >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
       - name: Enviar informe por correo
@@ -55,10 +54,10 @@ jobs:
         with:
           server_address: smtp.gmail.com
           server_port: 587
+          secure: true
           username: ${{ secrets.EMAIL_ADDRESS }}
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: "Informe semanal de tráfico del repo"
           to: ${{ secrets.EMAIL_ADDRESS }}
           from: ${{ secrets.EMAIL_ADDRESS }}
           html_body: ${{ env.html_body }}
-
