@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      # 1️⃣ Checkout del repositorio
+      # 1️⃣ Clonar el repositorio (rama main)
       - name: Checkout del repositorio
         uses: actions/checkout@v4
         with:
@@ -35,11 +35,7 @@ jobs:
           pip install requests
           python .github/scripts/traffic_report.py
 
-      # 5️⃣ Debug: comprobar que el HTML se creó
-      - name: Listar HTML generado
-        run: ls -l traffic-report.html
-
-      # 6️⃣ Enviar informe por correo
+      # 5️⃣ Enviar informe por correo
       - name: Enviar informe por correo
         uses: dawidd6/action-send-mail@v3
         with:
@@ -47,8 +43,7 @@ jobs:
           server_port: 587
           username: ${{ secrets.EMAIL_ADDRESS }}
           password: ${{ secrets.EMAIL_PASSWORD }}
-          from: ${{ secrets.EMAIL_ADDRESS }}      # obligatorio
-          to: ${{ secrets.EMAIL_ADDRESS }}
           subject: "Informe semanal de tráfico del repo"
-          html_body: |
-            $(cat traffic-report.html)
+          to: ${{ secrets.EMAIL_ADDRESS }}
+          from: ${{ secrets.EMAIL_ADDRESS }}
+          html_body: "<html>$(cat traffic-report.html)</html>"
