@@ -9,9 +9,11 @@ jobs:
   traffic_report:
     runs-on: ubuntu-latest
     steps:
-      # 1️⃣ Clonar el repositorio
+      # 1️⃣ Clonar el repositorio (rama main)
       - name: Checkout del repositorio
         uses: actions/checkout@v4
+        with:
+          ref: main  # Asegura que siempre use main
 
       # 2️⃣ Debug: listar archivos de .github
       - name: Listar archivos de .github para debug
