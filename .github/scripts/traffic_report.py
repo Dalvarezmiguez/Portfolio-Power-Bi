@@ -1,4 +1,5 @@
 import requests, json, os
+import matplotlib.pyplot as plt
 
 # --- Configuración ---
 token = os.environ["GITHUB_TOKEN"]
@@ -41,38 +42,34 @@ def make_table(data, headers):
     html += '</table>'
     return html
 
-def make_bar(value, max_value, color="#4CAF50"):
-    width = int((value/max_value)*100) if max_value>0 else 0
-    return f'<div style="background-color:{color}; width:{width}%; height:20px;"></div>'
+# --- Crear gráficos ---
+def plot_bar(data_list, filename, color="#4CAF50", title=""):
+    if not data_list:
+        return
+    fechas = [v['timestamp'][:10] for v in data_list]
+    valores = [v['count'] for v in data_list]
+    plt.figure(figsize=(10,4))
+    plt.bar(fechas, valores, color=color)
+    plt.title(title)
+    plt.xlabel('Fecha')
+    plt.ylabel('Cantidad')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.savefig(filename)
+    plt.close()
 
-def make_daily_bars(data_list, color="#4CAF50"):
-    max_val = max([v['count'] for v in data_list]+[1])
-    html = ""
-    for v in data_list:
-        day = v['timestamp'][:10]
-        width = int((v['count']/max_val)*100)
-        html += f"<div>{day} {v['count']}<div style='background-color:{color}; width:{width}%; height:15px;'></div></div>"
-    return html
+plot_bar(views.get('views',[]), 'visitas.png', color="#4CAF50", title='Visitas diarias')
+plot_bar(clones.get('clones',[]), 'clones.png', color="#2196F3", title='Clones diarios')
 
 # --- Crear HTML completo ---
 html_body = f"""
 <h1>Informe semanal de tráfico: {repo}</h1>
 
 <h2>Visitas</h2>
-{make_table(
-    [[compare(views.get('count',0), history.get('views',0)),
-      compare(views.get('uniques',0), history.get('uniques_views',0))]],
-    ['Total visitas','Visitantes únicos']
-)}
-{make_daily_bars(views.get('views',[]), color="#4CAF50")}
+<img src="cid:visitas.png" alt="Visitas">
 
 <h2>Clones</h2>
-{make_table(
-    [[compare(clones.get('count',0), history.get('clones',0)),
-      compare(clones.get('uniques',0), history.get('uniques_clones',0))]],
-    ['Total clones','Clonadores únicos']
-)}
-{make_daily_bars(clones.get('clones',[]), color="#2196F3")}
+<img src="cid:clones.png" alt="Clones">
 
 <h2>Referrers principales</h2>
 {make_table([[r['referrer'], r['count']] for r in referrers], ['Referrer','Visitas'])}
@@ -90,7 +87,7 @@ history = {
     "views": views.get("count",0),
     "uniques_views": views.get("uniques",0),
     "clones": clones.get("count",0),
-    "uniques_clones": clones.get("uniques_clones",0)
+    "uniques_clones": clones.get("uniques",0)
 }
 with open(history_file,"w") as f:
     json.dump(history,f)
