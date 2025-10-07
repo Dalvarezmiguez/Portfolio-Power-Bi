@@ -10,11 +10,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      # 1️⃣ Clonar el repositorio (rama main)
+      # 1️⃣ Checkout del repositorio
       - name: Checkout del repositorio
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: main  # Siempre usar main
 
       # 2️⃣ Debug: listar todos los archivos del repo
       - name: Listar archivos para debug
@@ -45,5 +45,5 @@ jobs:
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: "Informe semanal de tráfico del repo"
           to: ${{ secrets.EMAIL_ADDRESS }}
-          from: ${{ secrets.EMAIL_ADDRESS }}
-          html_body: "<html>$(cat traffic-report.html)</html>"
+          from: ${{ secrets.EMAIL_ADDRESS }}           # obligatorio
+          html_body: "<html>$(cat traffic-report.html)</html>"  # usar html_body en vez de body_type
