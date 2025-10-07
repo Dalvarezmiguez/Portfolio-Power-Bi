@@ -9,14 +9,21 @@ jobs:
   traffic_report:
     runs-on: ubuntu-latest
     steps:
+      # 1️⃣ Clonar el repositorio
       - name: Checkout del repositorio
         uses: actions/checkout@v4
 
+      # 2️⃣ Debug: listar archivos de .github
+      - name: Listar archivos de .github para debug
+        run: ls -R .github
+
+      # 3️⃣ Configurar Python
       - name: Configurar Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
+      # 4️⃣ Instalar requests y ejecutar script
       - name: Ejecutar script de tráfico
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -25,6 +32,7 @@ jobs:
           pip install requests
           python .github/scripts/traffic_report.py
 
+      # 5️⃣ Enviar informe por correo
       - name: Enviar informe por correo
         uses: dawidd6/action-send-mail@v3
         with:
