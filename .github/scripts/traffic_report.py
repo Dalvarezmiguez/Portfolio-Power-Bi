@@ -59,15 +59,19 @@ html_body = f"""
 <h1>Informe semanal de tráfico: {repo}</h1>
 
 <h2>Visitas</h2>
-{make_table([[compare(views.get('count',0), history.get('views',0)),
-             compare(views.get('uniques',0), history.get('uniques_views',0))],
-            ['Total visitas','Visitantes únicos']])}
+{make_table(
+    [[compare(views.get('count',0), history.get('views',0)),
+      compare(views.get('uniques',0), history.get('uniques_views',0))]],
+    ['Total visitas','Visitantes únicos']
+)}
 {make_daily_bars(views.get('views',[]), color="#4CAF50")}
 
 <h2>Clones</h2>
-{make_table([[compare(clones.get('count',0), history.get('clones',0)),
-             compare(clones.get('uniques',0), history.get('uniques_clones',0))],
-            ['Total clones','Clonadores únicos']])}
+{make_table(
+    [[compare(clones.get('count',0), history.get('clones',0)),
+      compare(clones.get('uniques',0), history.get('uniques_clones',0))]],
+    ['Total clones','Clonadores únicos']
+)}
 {make_daily_bars(clones.get('clones',[]), color="#2196F3")}
 
 <h2>Referrers principales</h2>
