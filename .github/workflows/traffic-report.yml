@@ -14,19 +14,15 @@ jobs:
       - name: Checkout del repositorio
         uses: actions/checkout@v4
         with:
-          ref: main  # Asegura que siempre use main
+          ref: main
 
-      # 2️⃣ Debug: listar todos los archivos del repo
-      - name: Listar archivos para debug
-        run: ls -R
-
-      # 3️⃣ Configurar Python
+      # 2️⃣ Configurar Python
       - name: Configurar Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
-      # 4️⃣ Instalar requests y ejecutar script
+      # 3️⃣ Instalar requests y ejecutar script
       - name: Ejecutar script de tráfico
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -35,7 +31,7 @@ jobs:
           pip install requests
           python .github/scripts/traffic_report.py
 
-      # 5️⃣ Enviar informe por correo
+      # 4️⃣ Enviar informe por correo
       - name: Enviar informe por correo
         uses: dawidd6/action-send-mail@v3
         with:
