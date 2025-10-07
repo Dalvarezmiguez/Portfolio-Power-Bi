@@ -1,11 +1,13 @@
 import requests, json, os
+import matplotlib.pyplot as plt
+from datetime import datetime
 
 # --- Configuración ---
 token = os.environ["GITHUB_TOKEN"]
 repo = os.environ["REPO"]
 headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
 
-# --- Recoger datos ---
+# --- Recoger datos de GitHub ---
 views = requests.get(f"https://api.github.com/repos/{repo}/traffic/views", headers=headers).json()
 clones = requests.get(f"https://api.github.com/repos/{repo}/traffic/clones", headers=headers).json()
 referrers = requests.get(f"https://api.github.com/repos/{repo}/traffic/popular/referrers", headers=headers).json()
@@ -41,18 +43,22 @@ def make_table(data, headers):
     html += '</table>'
     return html
 
-def make_bar(value, max_value, color="#4CAF50"):
-    width = int((value/max_value)*100) if max_value>0 else 0
-    return f'<div style="background-color:{color}; width:{width}%; height:20px;"></div>'
+# --- Crear gráficos con matplotlib ---
+def plot_daily(data_list, color, filename, title):
+    dates = [datetime.strptime(v['timestamp'][:10], "%Y-%m-%d") for v in data_list]
+    counts = [v['count'] for v in data_list]
 
-def make_daily_bars(data_list, color="#4CAF50"):
-    max_val = max([v['count'] for v in data_list]+[1])
-    html = ""
-    for v in data_list:
-        day = v['timestamp'][:10]
-        width = int((v['count']/max_val)*100)
-        html += f"<div>{day} {v['count']}<div style='background-color:{color}; width:{width}%; height:15px;'></div></div>"
-    return html
+    plt.figure(figsize=(10,5))
+    plt.bar(dates, counts, color=color)
+    plt.xticks(rotation=45)
+    plt.title(title)
+    plt.tight_layout()
+    plt.savefig(filename)
+    plt.close()
+
+# Generar gráficos
+plot_daily(views.get('views', []), "#4CAF50", "visitas.png", "Visitas diarias")
+plot_daily(clones.get('clones', []), "#2196F3", "clones.png", "Clones diarios")
 
 # --- Crear HTML completo ---
 html_body = f"""
@@ -64,7 +70,6 @@ html_body = f"""
       compare(views.get('uniques',0), history.get('uniques_views',0))]],
     ['Total visitas','Visitantes únicos']
 )}
-{make_daily_bars(views.get('views',[]), color="#4CAF50")}
 
 <h2>Clones</h2>
 {make_table(
@@ -72,7 +77,6 @@ html_body = f"""
       compare(clones.get('uniques',0), history.get('uniques_clones',0))]],
     ['Total clones','Clonadores únicos']
 )}
-{make_daily_bars(clones.get('clones',[]), color="#2196F3")}
 
 <h2>Referrers principales</h2>
 {make_table([[r['referrer'], r['count']] for r in referrers], ['Referrer','Visitas'])}
@@ -90,7 +94,7 @@ history = {
     "views": views.get("count",0),
     "uniques_views": views.get("uniques",0),
     "clones": clones.get("count",0),
-    "uniques_clones": clones.get("uniques",0)
+    "uniques_clones": clones.get("uniques_clones",0)
 }
 with open(history_file,"w") as f:
     json.dump(history,f)
