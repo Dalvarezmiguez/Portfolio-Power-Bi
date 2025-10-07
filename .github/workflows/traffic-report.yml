@@ -8,7 +8,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout del repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Leer contenido HTML
+        id: leer_html
+        run: |
+          contenido=$(cat traffic-report.html)
+          echo "html_body<<EOF" >> $GITHUB_ENV
+          echo "$contenido" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
       - name: Enviar informe por correo
         uses: dawidd6/action-send-mail@v3
@@ -20,10 +28,4 @@ jobs:
           subject: "Informe semanal de tráfico del repo"
           to: ${{ secrets.EMAIL_ADDRESS }}
           from: ${{ secrets.EMAIL_ADDRESS }}
-          html_body: ${{ steps.read_html.outputs.html_content }}
-
-      - name: Leer archivo HTML
-        id: read_html
-        run: |
-          html_content=$(cat traffic-report.html)
-          echo "::set-output name=html_content::$html_content"
+          html_body: ${{ env.html_body }}
